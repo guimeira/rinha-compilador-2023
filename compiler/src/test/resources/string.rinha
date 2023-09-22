@@ -1,0 +1,21 @@
+let a = "str";
+let _ = print(a);
+let b = 3 + a;
+let _ = print(b);
+let c = a + 3;
+let _ = print(c);
+let d = a + "bla";
+let _ = print(d);
+let e = "bla" + a;
+let _ = print(e);
+let f = a * 3;
+let _ = print(f);
+let g = 3 * a;
+let _ = print(g);
+let tt = 1 == 1;
+let h = a + tt;
+let _ = print(h);
+let i = (1,"abc");
+let _ = print(a + i);
+let j = fn(x) => { x };
+print(a + j)

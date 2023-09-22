@@ -1,0 +1,13 @@
+let a = (1, "str");
+let _ = print(a);
+let _ = print(first(a));
+let _ = print(second(a));
+let b = (((1,2),(10,20)),(("a","b"),("A","B")));
+let _ = print(first(first(first(b))));
+let _ = print(second(first(first(b))));
+let _ = print(first(second(first(b))));
+let _ = print(second(second(first(b))));
+let _ = print(first(first(second(b))));
+let _ = print(second(first(second(b))));
+let _ = print(first(second(second(b))));
+print(second(second(second(b))))

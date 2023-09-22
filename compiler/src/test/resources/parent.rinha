@@ -1,0 +1,11 @@
+let a = "A";
+let f1 = fn(x) => {
+  let bx = "B" + x;
+  fn(x) => {
+    (a + bx) * x
+  }
+};
+let f1Z = f1("Z");
+let _ = print(f1Z(2));
+let f1W = f1("W");
+print(f1W(3))

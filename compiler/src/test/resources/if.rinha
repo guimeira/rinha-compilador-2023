@@ -1,0 +1,25 @@
+let a = 10;
+let b = 20;
+let c = if(a > b) { 10*a } else { 10*b };
+let _ = print(c);
+let d = if(b > a) { 10*a } else { 10*b };
+let _ = print(d);
+let f = fn(b1, b2) => {
+  if(b1) {
+    if(b2) {
+      "b1b2"
+    } else {
+      "b1!b2"
+    }
+  } else {
+    if(b2) {
+      "!b1b2"
+    } else {
+      "!b1!b2"
+    }
+  }
+};
+let _ = print(f(true,true));
+let _ = print(f(true,false));
+let _ = print(f(false,true));
+print(f(false,false))
