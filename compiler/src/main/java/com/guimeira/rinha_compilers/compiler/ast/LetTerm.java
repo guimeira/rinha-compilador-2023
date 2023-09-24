@@ -27,6 +27,9 @@ public class LetTerm extends Term {
     //Criar novo escopo:
     ctx.pushScope();
 
+    //Não pode haver uma tail call aqui porque sabemos que há o "next" logo em seguida:
+    ctx.markAsNotTailCall();
+
     //Processar o rhs:
     value = value.preprocess(ctx);
 
@@ -34,6 +37,7 @@ public class LetTerm extends Term {
     ctx.popScope();
 
     //Processar os próximos terms:
+    ctx.markAsTailCall();
     next = next.preprocess(ctx);
 
     return this;

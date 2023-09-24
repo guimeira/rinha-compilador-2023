@@ -37,7 +37,7 @@ public class FunctionTerm extends Term {
     ctx.pushScope();
 
     //Marcar escopo como closure (se acessarmos variáveis fora deste escopo, elas serão capturadas):
-    ctx.markScopeAsClosure();
+    ctx.markScopeAsClosure(parameters.size());
 
     //Alocar variáveis para os parâmetros da função:
     parameters.forEach(p -> ctx.addVariable(p.text));

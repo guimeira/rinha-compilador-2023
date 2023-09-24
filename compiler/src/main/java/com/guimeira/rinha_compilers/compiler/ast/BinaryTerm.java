@@ -29,6 +29,10 @@ public class BinaryTerm extends Term {
 
   @Override
   public Term preprocess(PreprocessingContext ctx) {
+    //Qualquer chamada de função no LHS ou RHS não pode ser uma tail call porque após a chamada de função precisaremos
+    //executar esta operação binária:
+    ctx.markAsNotTailCall();
+
     //Este preprocessamento é uma pequena otimização: operações que não envolvam variáveis serão computadas aqui
     //Exemplo: "x = 2 + a" precisa ser compilado para "x = 2 + a" porque não sabemos o conteúdo de a
     //mas "x = 2 + 2" pode ser compilado para "x = 4" e evitamos fazer essa operação em tempo de execução

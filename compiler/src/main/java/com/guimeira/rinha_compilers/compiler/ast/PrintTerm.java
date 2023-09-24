@@ -22,6 +22,9 @@ public class PrintTerm extends Term {
 
   @Override
   public Term preprocess(PreprocessingContext ctx) {
+    //Uma chamada de função dentro do print não pode ser uma tail call:
+    ctx.markAsNotTailCall();
+
     value = value.preprocess(ctx);
     return this;
   }

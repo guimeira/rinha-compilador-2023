@@ -25,7 +25,16 @@ public class IfTerm extends Term {
 
   @Override
   public Term preprocess(PreprocessingContext ctx) {
+    boolean currentlyIsTailCall = ctx.isTailCall();
+
+    //Chamada de função dentro da condição do if não pode ser uma tail call:
+    ctx.markAsNotTailCall();
+
     condition = condition.preprocess(ctx);
+
+    if(currentlyIsTailCall) {
+      ctx.markAsTailCall();
+    }
 
     //Se por acaso a condição puder ser avaliada para um booleano em tempo de compilação, eliminamos o if:
     if(condition instanceof BoolTerm bt) {

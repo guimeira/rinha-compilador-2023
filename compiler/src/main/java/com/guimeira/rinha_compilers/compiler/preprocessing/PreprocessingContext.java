@@ -19,8 +19,48 @@ public class PreprocessingContext {
   /**
    * Marca o escopo atual como uma closure. Referências a variáveis de escopos pai serão capturadas.
    */
-  public void markScopeAsClosure() {
-    currentScope.markAsClosureScope();
+  public void markScopeAsClosure(int arity) {
+    currentScope.markAsClosureScope(arity);
+  }
+
+  public void markAsTailCall() {
+    Scope scope = findNearestClosureScope();
+
+    if(scope != null) {
+      scope.markAsTailCall();
+    }
+  }
+
+  public void markAsNotTailCall() {
+    Scope scope = findNearestClosureScope();
+
+    if(scope != null) {
+      scope.markAsNotTailCall();
+    }
+  }
+
+  public boolean isTailCall() {
+    Scope scope = findNearestClosureScope();
+
+    return scope != null && scope.isTailCall;
+  }
+
+  public int getCurrentFunctionArity() {
+    Scope scope = findNearestClosureScope();
+
+    if(scope != null) {
+      return scope.arity;
+    }
+
+    return -1;
+  }
+
+  private Scope findNearestClosureScope() {
+    Scope scope = currentScope;
+    while(scope != null && !scope.isClosure) {
+      scope = scope.parent;
+    }
+    return scope;
   }
 
   public void addFunctionArity(int arity) {
@@ -96,6 +136,12 @@ public class PreprocessingContext {
     //Se este escopo é uma closure (referências a escopos pais serão capturadas):
     private boolean isClosure;
 
+    //Se o term que estamos avaliando no momento está numa posição de tail, isto é, nenhuma outra operação será realizada pela função neste ramo da AST (usado somente se isClosure = true)
+    private boolean isTailCall = true;
+
+    //Aridade da função que estamos avaliando no momento (usado somente se isClosure = true)
+    private int arity;
+
     //Variáveis do contexto pai referenciadas por este escopo:
     private List<CapturedVariable> capturedVariables = new ArrayList<>();
 
@@ -106,8 +152,9 @@ public class PreprocessingContext {
       this.parent = parent;
     }
 
-    public void markAsClosureScope() {
+    public void markAsClosureScope(int arity) {
       isClosure = true;
+      this.arity = arity;
     }
 
     public Variable addVariable(String name) {
@@ -140,6 +187,14 @@ public class PreprocessingContext {
       }
 
       return capturedVariables.get(capturedVariables.size()-1).id + 1;
+    }
+
+    public void markAsTailCall() {
+      isTailCall = true;
+    }
+
+    public void markAsNotTailCall() {
+      isTailCall = false;
     }
   }
 }

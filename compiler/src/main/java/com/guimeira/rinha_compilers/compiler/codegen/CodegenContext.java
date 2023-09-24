@@ -4,12 +4,11 @@ import com.guimeira.rinha_compilers.compiler.codegen.constants.*;
 import com.guimeira.rinha_compilers.compiler.exception.CompilationException;
 import com.guimeira.rinha_compilers.compiler.run.RinhaClassloader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Deque;
-import java.util.LinkedList;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -71,7 +70,6 @@ public class CodegenContext {
 
     //Criar método que conterá o código da função:
     MethodVisitor methodVisitor = writer.visitMethod(ACC_PUBLIC, ClosureNames.INTERFACE_METHOD, ClosureNames.getInterfaceMethodDescriptor(arity), null, null);
-    currentCtx = new Ctx(currentCtx, className, writer, methodVisitor);
 
     methodVisitor.visitAnnotation(Types.OVERRIDE.getDescriptor(), true).visitEnd();
 
@@ -86,7 +84,16 @@ public class CodegenContext {
       methodVisitor.visitVarInsn(ASTORE, i);
     }
 
+    //Criar uma label para o início do código da função (poderá ser usado caso haja tail calls recursivas no corpo da função:
+    Label lblTop = new Label();
+    methodVisitor.visitLabel(lblTop);
+    currentCtx = new Ctx(currentCtx, className, writer, lblTop, methodVisitor);
+
     return className;
+  }
+
+  public Label getTopLabel() {
+    return currentCtx.lblTop;
   }
 
   /**
@@ -216,12 +223,14 @@ public class CodegenContext {
     private Ctx parent;
     private String className;
     private ClassWriter writer;
+    private Label lblTop;
     private MethodVisitor visitor;
 
-    public Ctx(Ctx parent, String className, ClassWriter writer, MethodVisitor visitor) {
+    public Ctx(Ctx parent, String className, ClassWriter writer, Label lblTop, MethodVisitor visitor) {
       this.parent = parent;
       this.className = className;
       this.writer = writer;
+      this.lblTop = lblTop;
       this.visitor = visitor;
     }
   }
