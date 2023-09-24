@@ -10,5 +10,5 @@ FROM eclipse-temurin:17-jdk-alpine
 COPY --from=0 ./runtime/target/runtime-1.0-SNAPSHOT.jar runtime.jar
 COPY --from=0 ./compiler/target/compiler-1.0-SNAPSHOT.jar compiler.jar
 
-ENTRYPOINT ["java", "-cp", "runtime.jar", "-jar", "compiler.jar"]
+ENTRYPOINT ["java", "-Xss128M", "-cp", "runtime.jar", "-jar", "compiler.jar"]
 CMD ["--run", "/var/rinha/source.rinha.json"]
