@@ -1,0 +1,9 @@
+let fact = fn(n, a) => {
+  if(n <= 1) {
+    a
+  } else {
+    fact(n-1, n*a)
+  }
+};
+print(fact(5, 1))
+
