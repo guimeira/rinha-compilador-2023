@@ -10,6 +10,7 @@ import java.io.PrintStream;
  * Tipos
  */
 public class Types {
+  public static final Type OBJECT = Type.getType(Object.class);
   public static final Type VALUE = Type.getType(Value.class);
   public static final Type VARIABLE = Type.getType(Variable.class);
   public static final Type INT_VALUE = Type.getType(IntValue.class);

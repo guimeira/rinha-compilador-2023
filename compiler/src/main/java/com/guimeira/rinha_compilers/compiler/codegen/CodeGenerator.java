@@ -2,6 +2,7 @@ package com.guimeira.rinha_compilers.compiler.codegen;
 
 import com.guimeira.rinha_compilers.compiler.ast.Term;
 import com.guimeira.rinha_compilers.compiler.codegen.constants.ClosureNames;
+import com.guimeira.rinha_compilers.compiler.preprocessing.Preprocessor;
 
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -20,9 +21,9 @@ public class CodeGenerator {
   /**
    * Realiza a geração de código.
    */
-  public void process(Term term) {
-    ctx.startFunction(0, 0);
-    term.codeGen(ctx);
+  public void process(Preprocessor preprocessor) {
+    ctx.startFunction(0, preprocessor.getContext().getVariablesInScope().size(), 0);
+    preprocessor.getPreprocessedAst().codeGen(ctx);
     ctx.endFunction();
     ctx.generateEntryPoint();
   }

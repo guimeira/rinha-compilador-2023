@@ -5,6 +5,9 @@ import com.guimeira.rinha_compilers.rt.value.*;
 import org.objectweb.asm.Type;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * Nomes internos de classes.
@@ -15,6 +18,9 @@ public class InternalNames {
   public static final String VALUE = Type.getInternalName(com.guimeira.rinha_compilers.rt.value.Value.class);
   public static final String SYSTEM = Type.getInternalName(System.class);
   public static final String PRINT_STREAM = Type.getInternalName(PrintStream.class);
+  public static final String ARRAY_LIST = Type.getInternalName(ArrayList.class);
+  public static final String HASH_MAP = Type.getInternalName(HashMap.class);
+  public static final String LINKED_HASH_MAP = Type.getInternalName(LinkedHashMap.class);
 
   /**
    * Subclasses de {@link com.guimeira.rinha_compilers.rt.value.Value}

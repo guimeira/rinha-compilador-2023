@@ -3,6 +3,7 @@ package com.guimeira.rinha_compilers.compiler.ast;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.guimeira.rinha_compilers.compiler.codegen.CodegenContext;
 import com.guimeira.rinha_compilers.compiler.codegen.constants.InternalNames;
+import com.guimeira.rinha_compilers.compiler.codegen.constants.LocalVars;
 import com.guimeira.rinha_compilers.compiler.codegen.constants.MethodDescriptors;
 import com.guimeira.rinha_compilers.compiler.codegen.constants.TypeDescriptors;
 import com.guimeira.rinha_compilers.compiler.preprocessing.PreprocessingContext;
@@ -48,5 +49,9 @@ public class PrintTerm extends Term {
 
     //Agora a pilha contém o System.out seguido da string a ser impressa. Vamos chamar o método print to System.out:
     visitor.visitMethodInsn(INVOKEVIRTUAL, InternalNames.PRINT_STREAM, "println", MethodDescriptors.SystemOut.PRINT, false); //pilha: VALUE
+
+    //Por fim, marcar a execução atual como não memoizável:
+    visitor.visitLdcInsn(Boolean.FALSE);
+    visitor.visitVarInsn(ISTORE, ctx.getCurrentFunctionLocalVariableCount() + LocalVars.IS_MEMOIZABLE);
   }
 }

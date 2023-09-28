@@ -40,7 +40,7 @@ public class Main {
 
     CodeGenerator codeGen = new CodeGenerator(sourcePath.getParent(), writeClasses, runCode);
     codeGen.generateFunctionInterfaces(preprocessor.getContext().getFunctionArities());
-    codeGen.process(preprocessor.getPreprocessedAst());
+    codeGen.process(preprocessor);
 
     if(runCode) {
       codeGen.run();

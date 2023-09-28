@@ -1,6 +1,20 @@
 package com.guimeira.rinha_compilers.rt.value;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 public abstract class Value {
+  private boolean memoizable;
+
+  public void setMemoizable(boolean memoizable) {
+    this.memoizable = memoizable;
+  }
+
+  public boolean isMemoizable() {
+    return memoizable;
+  }
+
   public Value add(Value value) {
     throw new UnsupportedOperationException();
   }

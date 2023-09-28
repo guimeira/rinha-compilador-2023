@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.guimeira.rinha_compilers.compiler.codegen.constants.ClosureNames;
 import com.guimeira.rinha_compilers.compiler.codegen.CodegenContext;
 import com.guimeira.rinha_compilers.compiler.codegen.constants.InternalNames;
+import com.guimeira.rinha_compilers.compiler.codegen.constants.LocalVars;
 import com.guimeira.rinha_compilers.compiler.codegen.constants.MethodDescriptors;
 import com.guimeira.rinha_compilers.compiler.preprocessing.PreprocessingContext;
 import org.objectweb.asm.Label;
@@ -107,5 +108,12 @@ public class CallTerm extends Term {
     MethodVisitor visitor = ctx.getMethodVisitor();
     int arity = arguments.size();
     visitor.visitMethodInsn(INVOKEINTERFACE, ClosureNames.getFullInterfaceName(arity), ClosureNames.INTERFACE_METHOD, ClosureNames.getInterfaceMethodDescriptor(arity), true);
+
+    //Atualizar a flag isMemoizable:
+    visitor.visitInsn(DUP);
+    visitor.visitMethodInsn(INVOKEVIRTUAL, InternalNames.VALUE, "isMemoizable", MethodDescriptors.Value.IS_MEMOIZABLE, false);
+    visitor.visitVarInsn(ILOAD, ctx.getCurrentFunctionLocalVariableCount() + LocalVars.IS_MEMOIZABLE);
+    visitor.visitInsn(IAND);
+    visitor.visitVarInsn(ISTORE, ctx.getCurrentFunctionLocalVariableCount() + LocalVars.IS_MEMOIZABLE);
   }
 }

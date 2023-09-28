@@ -60,7 +60,7 @@ public class FunctionTerm extends Term {
   @Override
   public void codeGen(CodegenContext ctx) {
     //Gerar código desta função (será colocado em uma classe separada):
-    String className = ctx.startFunction(capturedVariables.size(), parameters.size());
+    String className = ctx.startFunction(capturedVariables.size(), variables.size(), parameters.size());
     value.codeGen(ctx);
     ctx.endFunction();
 

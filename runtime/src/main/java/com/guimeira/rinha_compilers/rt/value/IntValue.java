@@ -1,5 +1,7 @@
 package com.guimeira.rinha_compilers.rt.value;
 
+import java.util.Objects;
+
 public class IntValue extends Value {
   private int v;
 
@@ -102,5 +104,18 @@ public class IntValue extends Value {
   @Override
   public String toStringRepresentation() {
     return String.valueOf(v);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    IntValue intValue = (IntValue) o;
+    return v == intValue.v;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(v);
   }
 }

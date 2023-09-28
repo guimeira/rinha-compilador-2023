@@ -1,5 +1,7 @@
 package com.guimeira.rinha_compilers.rt.value;
 
+import java.util.Objects;
+
 public class BoolValue extends Value {
   public static BoolValue TRUE = new BoolValue(true);
   public static BoolValue FALSE = new BoolValue(false);
@@ -54,5 +56,18 @@ public class BoolValue extends Value {
   @Override
   public String toStringRepresentation() {
     return String.valueOf(v);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    BoolValue boolValue = (BoolValue) o;
+    return v == boolValue.v;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(v);
   }
 }

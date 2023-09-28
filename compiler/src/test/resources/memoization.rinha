@@ -1,0 +1,27 @@
+let pure = fn(x) => {
+  x + 2
+};
+let impure = fn(x) => {
+  let _ = print(x);
+  x + 2
+};
+let impure_indirect = fn(x) => {
+  impure(x)
+};
+let maybe_impure = fn(closure, x) => {
+  closure(x)
+};
+let _ = print(pure(2));
+let _ = print(pure(2));
+
+let _ = print(impure(2));
+let _ = print(impure(2));
+
+let _ = print(impure_indirect(2));
+let _ = print(impure_indirect(2));
+
+let _ = print(maybe_impure(pure,20));
+let _ = print(maybe_impure(pure,20));
+
+let _ = print(maybe_impure(impure,20));
+print(maybe_impure(impure,20))

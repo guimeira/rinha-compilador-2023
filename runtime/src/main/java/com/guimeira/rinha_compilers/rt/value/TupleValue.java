@@ -1,5 +1,7 @@
 package com.guimeira.rinha_compilers.rt.value;
 
+import java.util.Objects;
+
 public class TupleValue extends Value {
   private Value v1, v2;
 
@@ -43,5 +45,18 @@ public class TupleValue extends Value {
   @Override
   public String toStringRepresentation() {
     return "(" + v1.toStringRepresentation() + "," + v2.toStringRepresentation() + ")";
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    TupleValue that = (TupleValue) o;
+    return Objects.equals(v1, that.v1) && Objects.equals(v2, that.v2);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(v1, v2);
   }
 }

@@ -15,7 +15,6 @@ public class Preprocessor {
     ctx = new PreprocessingContext();
     ctx.pushScope();
     preprocessedAst = file.expression.preprocess(ctx);
-    ctx.popScope();
   }
 
   public PreprocessingContext getContext() {

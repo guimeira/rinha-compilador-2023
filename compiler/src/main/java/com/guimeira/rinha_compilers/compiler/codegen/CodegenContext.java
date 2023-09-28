@@ -40,7 +40,7 @@ public class CodegenContext {
   /**
    * Inicia a geração de código para uma nova função.
    */
-  public String startFunction(int capturedVariables, int arity) {
+  public String startFunction(int capturedVariables, int localVariables, int arity) {
     //Criar classe que conterá esta função:
     String className = ClosureNames.getFullClassInternalName(classNameCounter++);
     ClassWriter writer = new RinhaClassWriter(ClassWriter.COMPUTE_FRAMES);
@@ -73,6 +73,30 @@ public class CodegenContext {
 
     methodVisitor.visitAnnotation(Types.OVERRIDE.getDescriptor(), true).visitEnd();
 
+    //Verificar se temos um resultado memoizado para esta chamada:
+    methodVisitor.visitVarInsn(ALOAD, 0);
+    methodVisitor.visitFieldInsn(GETFIELD, InternalNames.Value.CLOSURE_VALUE, "memoizedInvocations", TypeDescriptors.LINKED_HASH_MAP);
+    methodVisitor.visitTypeInsn(NEW, InternalNames.ARRAY_LIST);
+    methodVisitor.visitInsn(DUP);
+    methodVisitor.visitLdcInsn(arity);
+    methodVisitor.visitMethodInsn(INVOKESPECIAL, InternalNames.ARRAY_LIST, "<init>", MethodDescriptors.ArrayList.CAPACITY_CONSTRUCTOR, false);
+    for(int i = 1; i <= arity; i++) {
+      methodVisitor.visitInsn(DUP);
+      methodVisitor.visitVarInsn(ALOAD, i);
+      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, InternalNames.ARRAY_LIST, "add", MethodDescriptors.ArrayList.ADD, false);
+      methodVisitor.visitInsn(POP);
+    }
+    methodVisitor.visitInsn(DUP);
+    methodVisitor.visitVarInsn(ASTORE, localVariables + LocalVars.MEMOIZATION_KEY);
+    methodVisitor.visitMethodInsn(INVOKEVIRTUAL, InternalNames.LINKED_HASH_MAP, "get", MethodDescriptors.LinkedHashMap.GET, false);
+    methodVisitor.visitInsn(DUP);
+    Label afterMemoizationCheck = new Label();
+    methodVisitor.visitJumpInsn(IFNULL, afterMemoizationCheck);
+    methodVisitor.visitTypeInsn(CHECKCAST, InternalNames.VALUE);
+    methodVisitor.visitInsn(ARETURN);
+
+    methodVisitor.visitLabel(afterMemoizationCheck);
+    methodVisitor.visitInsn(POP);
     //Criar uma instância de Variable para cada parâmetro:
     for(int i = 1; i <= arity; i++) {
       methodVisitor.visitTypeInsn(NEW, InternalNames.VARIABLE);
@@ -84,10 +108,14 @@ public class CodegenContext {
       methodVisitor.visitVarInsn(ASTORE, i);
     }
 
+    //Criar uma variável local que armazena se a chamada da função é memoizable:
+    methodVisitor.visitLdcInsn(Boolean.TRUE);
+    methodVisitor.visitVarInsn(ISTORE, localVariables + LocalVars.IS_MEMOIZABLE);
+
     //Criar uma label para o início do código da função (poderá ser usado caso haja tail calls recursivas no corpo da função:
     Label lblTop = new Label();
     methodVisitor.visitLabel(lblTop);
-    currentCtx = new Ctx(currentCtx, className, writer, lblTop, methodVisitor);
+    currentCtx = new Ctx(currentCtx, className, writer, lblTop, localVariables, methodVisitor);
 
     return className;
   }
@@ -112,14 +140,34 @@ public class CodegenContext {
     currentCtx.visitor.visitMethodInsn(INVOKEVIRTUAL, InternalNames.VARIABLE, "getValue", MethodDescriptors.Variable.GET_VALUE, false);
   }
 
+  public int getCurrentFunctionLocalVariableCount() {
+    return currentCtx.localVariables;
+  }
   /**
    * Finaliza a geração de uma função. Se writeClasses está habilitado, escreve o arquivo .class. Se runCode está
    * habilitado, adiciona a classe ao classloader.
    */
   public void endFunction() {
-    currentCtx.visitor.visitInsn(ARETURN);
-    currentCtx.visitor.visitMaxs(0, 0);
-    currentCtx.visitor.visitEnd();
+    MethodVisitor visitor = currentCtx.visitor;
+    visitor.visitInsn(DUP);
+    visitor.visitVarInsn(ILOAD, currentCtx.localVariables + LocalVars.IS_MEMOIZABLE);
+    visitor.visitMethodInsn(INVOKEVIRTUAL, InternalNames.VALUE, "setMemoizable", MethodDescriptors.Value.SET_MEMOIZABLE, false);
+    Label afterMemoization = new Label();
+    visitor.visitVarInsn(ILOAD, currentCtx.localVariables + LocalVars.IS_MEMOIZABLE);
+    visitor.visitJumpInsn(IFEQ, afterMemoization);
+    visitor.visitInsn(DUP);
+    visitor.visitVarInsn(ALOAD, 0);
+    visitor.visitFieldInsn(GETFIELD, InternalNames.Value.CLOSURE_VALUE, "memoizedInvocations", TypeDescriptors.LINKED_HASH_MAP);
+    visitor.visitInsn(SWAP);
+    visitor.visitVarInsn(ALOAD, currentCtx.localVariables + LocalVars.MEMOIZATION_KEY);
+    visitor.visitInsn(SWAP);
+    visitor.visitMethodInsn(INVOKEVIRTUAL, InternalNames.HASH_MAP, "put", MethodDescriptors.HashMap.PUT, false);
+    visitor.visitInsn(POP);
+
+    visitor.visitLabel(afterMemoization);
+    visitor.visitInsn(ARETURN);
+    visitor.visitMaxs(0, 0);
+    visitor.visitEnd();
     currentCtx.writer.visitEnd();
     process(currentCtx.className, currentCtx.writer);
     currentCtx = currentCtx.parent;
@@ -224,13 +272,15 @@ public class CodegenContext {
     private String className;
     private ClassWriter writer;
     private Label lblTop;
+    private int localVariables;
     private MethodVisitor visitor;
 
-    public Ctx(Ctx parent, String className, ClassWriter writer, Label lblTop, MethodVisitor visitor) {
+    public Ctx(Ctx parent, String className, ClassWriter writer, Label lblTop, int localVariables, MethodVisitor visitor) {
       this.parent = parent;
       this.className = className;
       this.writer = writer;
       this.lblTop = lblTop;
+      this.localVariables = localVariables;
       this.visitor = visitor;
     }
   }

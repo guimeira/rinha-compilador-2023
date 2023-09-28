@@ -1,5 +1,7 @@
 package com.guimeira.rinha_compilers.rt.value;
 
+import java.util.Objects;
+
 public class StrValue extends Value {
   private String v;
 
@@ -78,5 +80,18 @@ public class StrValue extends Value {
   @Override
   public String toStringRepresentation() {
     return v;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    StrValue strValue = (StrValue) o;
+    return Objects.equals(v, strValue.v);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(v);
   }
 }

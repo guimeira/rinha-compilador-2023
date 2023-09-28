@@ -22,6 +22,8 @@ public class MethodDescriptors {
     public static final String FIRST_SECOND = Type.getMethodDescriptor(Types.VALUE);
     public static final String BINARY_OPERATION = Type.getMethodDescriptor(Types.VALUE, Types.VALUE);
     public static final String BOOLEAN_BINARY_OPERATION = Type.getMethodDescriptor(Types.BOOL_VALUE, Types.VALUE);
+    public static final String SET_MEMOIZABLE = Type.getMethodDescriptor(Type.VOID_TYPE, Type.BOOLEAN_TYPE);
+    public static final String IS_MEMOIZABLE = Type.getMethodDescriptor(Type.BOOLEAN_TYPE);
   }
 
   public static class BoolValue {
@@ -43,4 +45,16 @@ public class MethodDescriptors {
     public static final String GET_VALUE = Type.getMethodDescriptor(Types.VALUE);
   }
 
+  public static class ArrayList {
+    public static final String CAPACITY_CONSTRUCTOR = Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE);
+    public static final String ADD = Type.getMethodDescriptor(Type.BOOLEAN_TYPE, Types.OBJECT);
+  }
+
+  public static class LinkedHashMap {
+    public static final String GET = Type.getMethodDescriptor(Types.OBJECT, Types.OBJECT);
+  }
+
+  public static class HashMap {
+    public static final String PUT = Type.getMethodDescriptor(Types.OBJECT, Types.OBJECT, Types.OBJECT);
+  }
 }
