@@ -22,9 +22,9 @@ public class SecondTerm extends Term {
   @Override
   public Term preprocess(PreprocessingContext ctx) {
     //Se houver uma chamada de função no parâmetro de second() ele não pode ser uma tail call já que teremos que realizar esta operação em seguida:
-    ctx.markAsNotTailCall();
-
-    value = value.preprocess(ctx);
+    ctx.withTailCallDisabled(() -> {
+      value = value.preprocess(ctx);
+    });
     return this;
   }
 

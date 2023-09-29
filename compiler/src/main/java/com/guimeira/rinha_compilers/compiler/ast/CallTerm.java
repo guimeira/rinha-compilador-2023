@@ -32,12 +32,15 @@ public class CallTerm extends Term {
     isTailCall = ctx.isTailCall() && arguments.size() == ctx.getCurrentFunctionArity();
     callee = callee.preprocess(ctx);
 
-    ListIterator<Term> it = arguments.listIterator();
-    while(it.hasNext()) {
-      Term term = it.next();
-      term = term.preprocess(ctx);
-      it.set(term);
-    }
+    //Se houver uma chamada de função dentro de um dos parâmetros desta chamada de função ela não pode ser uma tail call:
+    ctx.withTailCallDisabled(() -> {
+      ListIterator<Term> it = arguments.listIterator();
+      while (it.hasNext()) {
+        Term term = it.next();
+        term = term.preprocess(ctx);
+        it.set(term);
+      }
+    });
 
     return this;
   }
@@ -80,7 +83,7 @@ public class CallTerm extends Term {
 
     //Agora que calculamos o valor de cada argumento, vamos atualizar as Variables. Armazenamos na ordem inversa devido
     //à posição dos argumentos na pilha:
-    for(int i = arguments.size() -1; i >= 0; i--) {
+    for(int i = arguments.size() - 1; i >= 0; i--) {
       //Colocar a Variable que armazena este argumento na pilha:
       visitor.visitVarInsn(ALOAD, i+1);
 

@@ -28,16 +28,15 @@ public class LetTerm extends Term {
     ctx.pushScope();
 
     //Não pode haver uma tail call aqui porque sabemos que há o "next" logo em seguida:
-    ctx.markAsNotTailCall();
-
-    //Processar o rhs:
-    value = value.preprocess(ctx);
+    ctx.withTailCallDisabled(() -> {
+      //Processar o rhs:
+      value = value.preprocess(ctx);
+    });
 
     //Remover o escopo atual:
     ctx.popScope();
 
     //Processar os próximos terms:
-    ctx.markAsTailCall();
     next = next.preprocess(ctx);
 
     return this;

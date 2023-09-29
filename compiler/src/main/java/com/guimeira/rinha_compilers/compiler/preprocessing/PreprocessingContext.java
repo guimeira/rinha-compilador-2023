@@ -1,6 +1,7 @@
 package com.guimeira.rinha_compilers.compiler.preprocessing;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class PreprocessingContext {
   private Scope currentScope = null;
@@ -23,20 +24,31 @@ public class PreprocessingContext {
     currentScope.markAsClosureScope(arity);
   }
 
-  public void markAsTailCall() {
+  public <T> T withTailCall(boolean tailCallStatus, Supplier<T> runnable) {
     Scope scope = findNearestClosureScope();
+    boolean currentTailCallStatus = false;
+    if(scope != null) {
+      currentTailCallStatus = scope.isTailCall;
+      scope.isTailCall = tailCallStatus;
+    }
+    T returnValue = runnable.get();
 
     if(scope != null) {
-      scope.markAsTailCall();
+      scope.isTailCall = currentTailCallStatus;
     }
+
+    return returnValue;
   }
 
-  public void markAsNotTailCall() {
-    Scope scope = findNearestClosureScope();
+  public <T> T withTailCallDisabled(Supplier<T> runnable) {
+    return withTailCall(false, runnable);
+  }
 
-    if(scope != null) {
-      scope.markAsNotTailCall();
-    }
+  public void withTailCallDisabled(Runnable runnable) {
+    withTailCall(false, () -> {
+      runnable.run();
+      return null;
+    });
   }
 
   public boolean isTailCall() {
@@ -187,14 +199,6 @@ public class PreprocessingContext {
       }
 
       return capturedVariables.get(capturedVariables.size()-1).id + 1;
-    }
-
-    public void markAsTailCall() {
-      isTailCall = true;
-    }
-
-    public void markAsNotTailCall() {
-      isTailCall = false;
     }
   }
 }

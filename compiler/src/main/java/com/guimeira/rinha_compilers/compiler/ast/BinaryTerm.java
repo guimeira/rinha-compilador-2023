@@ -31,87 +31,87 @@ public class BinaryTerm extends Term {
   public Term preprocess(PreprocessingContext ctx) {
     //Qualquer chamada de função no LHS ou RHS não pode ser uma tail call porque após a chamada de função precisaremos
     //executar esta operação binária:
-    ctx.markAsNotTailCall();
+    return ctx.withTailCallDisabled(() -> {
+      //Este preprocessamento é uma pequena otimização: operações que não envolvam variáveis serão computadas aqui
+      //Exemplo: "x = 2 + a" precisa ser compilado para "x = 2 + a" porque não sabemos o conteúdo de a
+      //mas "x = 2 + 2" pode ser compilado para "x = 4" e evitamos fazer essa operação em tempo de execução
 
-    //Este preprocessamento é uma pequena otimização: operações que não envolvam variáveis serão computadas aqui
-    //Exemplo: "x = 2 + a" precisa ser compilado para "x = 2 + a" porque não sabemos o conteúdo de a
-    //mas "x = 2 + 2" pode ser compilado para "x = 4" e evitamos fazer essa operação em tempo de execução
+      lhs = lhs.preprocess(ctx);
+      rhs = rhs.preprocess(ctx);
 
-    lhs = lhs.preprocess(ctx);
-    rhs = rhs.preprocess(ctx);
+      if (lhs instanceof ProcessableInCompilationTime plhs && rhs instanceof ProcessableInCompilationTime prhs) {
+        //Converter os termos em instâncias de Value (usadas em runtime). Isso evita de termos que implementar
+        //todas as operações duas vezes (uma nas classes de runtime e outra nas classes de compilação)
+        Value runtimeLhs = plhs.toRuntimeValue();
+        Value runtimeRhs = prhs.toRuntimeValue();
 
-    if(lhs instanceof ProcessableInCompilationTime plhs && rhs instanceof ProcessableInCompilationTime prhs) {
-      //Converter os termos em instâncias de Value (usadas em runtime). Isso evita de termos que implementar
-      //todas as operações duas vezes (uma nas classes de runtime e outra nas classes de compilação)
-      Value runtimeLhs = plhs.toRuntimeValue();
-      Value runtimeRhs = prhs.toRuntimeValue();
+        Value result = null;
+        try {
+          switch (op) {
+            case ADD:
+              result = runtimeLhs.add(runtimeRhs);
+              break;
 
-      Value result = null;
-      try {
-        switch (op) {
-          case ADD:
-            result = runtimeLhs.add(runtimeRhs);
-            break;
+            case SUB:
+              result = runtimeLhs.sub(runtimeRhs);
+              break;
 
-          case SUB:
-            result = runtimeLhs.sub(runtimeRhs);
-            break;
+            case MUL:
+              result = runtimeLhs.mul(runtimeRhs);
+              break;
 
-          case MUL:
-            result = runtimeLhs.mul(runtimeRhs);
-            break;
+            case DIV:
+              result = runtimeLhs.div(runtimeRhs);
+              break;
 
-          case DIV:
-            result = runtimeLhs.div(runtimeRhs);
-            break;
+            case REM:
+              result = runtimeLhs.rem(runtimeRhs);
+              break;
 
-          case REM:
-            result = runtimeLhs.rem(runtimeRhs);
-            break;
+            case EQ:
+              result = runtimeLhs.eq(runtimeRhs);
+              break;
 
-          case EQ:
-            result = runtimeLhs.eq(runtimeRhs);
-            break;
+            case NEQ:
+              result = runtimeLhs.neq(runtimeRhs);
+              break;
 
-          case NEQ:
-            result = runtimeLhs.neq(runtimeRhs);
-            break;
+            case LT:
+              result = runtimeLhs.lt(runtimeRhs);
+              break;
 
-          case LT:
-            result = runtimeLhs.lt(runtimeRhs);
-            break;
+            case GT:
+              result = runtimeLhs.gt(runtimeRhs);
+              break;
 
-          case GT:
-            result = runtimeLhs.gt(runtimeRhs);
-            break;
+            case LTE:
+              result = runtimeLhs.lte(runtimeRhs);
+              break;
 
-          case LTE:
-            result = runtimeLhs.lte(runtimeRhs);
-            break;
+            case GTE:
+              result = runtimeLhs.gte(runtimeRhs);
+              break;
 
-          case GTE:
-            result = runtimeLhs.gte(runtimeRhs);
-            break;
+            case AND:
+              result = runtimeLhs.and(runtimeRhs);
+              break;
 
-          case AND:
-            result = runtimeLhs.and(runtimeRhs);
-            break;
+            case OR:
+              result = runtimeLhs.or(runtimeRhs);
+              break;
 
-          case OR:
-            result = runtimeLhs.or(runtimeRhs);
-            break;
-
-          default:
-            throw new CompilationException("Operação inválida: " + op, location);
+            default:
+              throw new CompilationException("Operação inválida: " + op, location);
+          }
+        } catch (Exception e) {
+          throw new CompilationException("Operação inválida: " + op, location);
         }
-      } catch(Exception e) {
-        throw new CompilationException("Operação inválida: " + op, location);
+
+        return Term.fromRuntimeValue(result, location);
       }
 
-      return Term.fromRuntimeValue(result, location);
-    }
-
-    return this;
+      return this;
+    });
   }
 
   @Override

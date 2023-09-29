@@ -22,9 +22,10 @@ public class TupleTerm extends Term {
 
   @Override
   public Term preprocess(PreprocessingContext ctx) {
-    ctx.markAsNotTailCall();
-    first = first.preprocess(ctx);
-    second = second.preprocess(ctx);
+    ctx.withTailCallDisabled(() -> {
+      first = first.preprocess(ctx);
+      second = second.preprocess(ctx);
+    });
     return this;
   }
 
