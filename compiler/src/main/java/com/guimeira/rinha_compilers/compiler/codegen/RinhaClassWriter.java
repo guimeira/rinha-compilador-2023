@@ -16,8 +16,8 @@ import java.util.regex.Pattern;
  * a classe comum entre uma das nossas classes geradas e qualquer outra classe é Object.
  */
 public class RinhaClassWriter extends ClassWriter {
-  private static final Pattern CLOSURE_PATTERN = Pattern.compile(CodegenContext.PACKAGE_NAME + "/Closure[0-9]+$");
-  private static final Pattern INTERFACE_PATTERN = Pattern.compile(CodegenContext.PACKAGE_NAME + "/F[0-9]+$");
+  private static final Pattern CLOSURE_PATTERN = Pattern.compile(CodegenContext.PACKAGE_NAME + "Closure[0-9]+$");
+  private static final Pattern INTERFACE_PATTERN = Pattern.compile(CodegenContext.PACKAGE_NAME + "F[0-9]+$");
 
   public RinhaClassWriter(int flags) {
     super(flags);
@@ -25,8 +25,17 @@ public class RinhaClassWriter extends ClassWriter {
 
   @Override
   protected String getCommonSuperClass(String type1, String type2) {
-    if(CLOSURE_PATTERN.matcher(type1).matches() || CLOSURE_PATTERN.matcher(type2).matches() ||
-    INTERFACE_PATTERN.matcher(type1).matches() || INTERFACE_PATTERN.matcher(type2).matches()) {
+    boolean type1IsClosure = CLOSURE_PATTERN.matcher(type1).matches() || type1.equals(InternalNames.Value.CLOSURE_VALUE);
+    boolean type2IsClosure = CLOSURE_PATTERN.matcher(type2).matches() || type2.equals(InternalNames.Value.CLOSURE_VALUE);
+
+    if(type1IsClosure && type2IsClosure) {
+      return InternalNames.Value.CLOSURE_VALUE;
+    }
+
+    boolean type1IsInterface = INTERFACE_PATTERN.matcher(type1).matches();
+    boolean type2IsInterface = INTERFACE_PATTERN.matcher(type2).matches();
+
+    if(type1IsClosure || type2IsClosure || type1IsInterface || type2IsInterface) {
       return InternalNames.OBJECT;
     }
 
